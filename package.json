@@ -1,0 +1,10 @@
+{ "name": "gitstats",
+  "version": "0.0.1",
+  "author": "Mike Vegeto <michael.vegeto@gmail.com>",
+  "description": "Parses/analyzes local git repositories and public GitHub repositories.",
+  "main": "./gitstats",
+  "engines": { "node": ">=0.8.0" },
+  "keywords": [ "git", "GitHub", "Statistics", "Development", "Project Management" ],
+  "licenses": [ { "type": "MIT", "url": "http://raw.github.com/ZECTBynmo/gitstats/master/LICENSE" } ],
+  "repository": { "type": "git", "url": "http://github.com/ZECTBynmo/gitstats.git" }
+}
