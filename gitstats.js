@@ -150,13 +150,9 @@ function parseCommits( commits, committerInfo, callback ) {
 		committerInfo = {};
 	}
 
-	console.log( typeof(committerInfo[ALL_COMMITS]) );
-
 	var isFinished = false;
 
 	if( typeof(committerInfo[ALL_COMMITS]) == "undefined" ) {
-		console.log(" setting up global user" );
-
 		// Setup a user that will represent the entire repository
 		var globalUser = {
 			name: "all",
@@ -195,8 +191,6 @@ function parseCommits( commits, committerInfo, callback ) {
 		userEntry.commitTimes.push( time );
 		globalUser.commitTimes.push( time );
 		userEntry.numCommits++;
-
-		console.log( typeof(globalUser) );
 		
 		// Push this user back into the map
 		committerInfo[userString] = userEntry;
