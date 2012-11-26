@@ -22,7 +22,8 @@ var git = require("gift"),
 var DEBUG = true,
 	NUM_HISTOGRAM_BINS = 24, // one for each hour...
 	NUM_COMMITS_PER_FETCH = 500, // We have to set this carefully, because fetching too much overloads sdout\
-	NUM_MAX_FETCHES = 200;
+	NUM_MAX_FETCHES = 200,
+	ALL_COMMITS = "all:commits"
 
 var log = function( text ) {
 	if( DEBUG ) console.log( text ) ;
@@ -101,7 +102,7 @@ function getLocalCommits( repoPath, branchName, forcePull, callback ) {
 					}
 
 					analysisData = data;
-					
+
 					iBatch++;
 					onError();
 				});
@@ -149,15 +150,23 @@ function parseCommits( commits, committerInfo, callback ) {
 		committerInfo = {};
 	}
 
+	console.log( typeof(committerInfo[ALL_COMMITS]) );
+
 	var isFinished = false;
 
-	// Setup a user that will represent the entire repository
-	var globalUser = {
-		name: "all",
-		email: "commits",
-		numCommits: 0,
-		commitTimes: []
-	};
+	if( typeof(committerInfo[ALL_COMMITS]) == "undefined" ) {
+		console.log(" setting up global user" );
+
+		// Setup a user that will represent the entire repository
+		var globalUser = {
+			name: "all",
+			email: "commits",
+			numCommits: 0,
+			commitTimes: []
+		};
+	} else {
+		globalUser = committerInfo[ALL_COMMITS];
+	}
 	
 	// Loop through all of the commits in this repository
 	for( var iCommit in commits ) {
@@ -186,16 +195,19 @@ function parseCommits( commits, committerInfo, callback ) {
 		userEntry.commitTimes.push( time );
 		globalUser.commitTimes.push( time );
 		userEntry.numCommits++;
+
+		console.log( typeof(globalUser) );
 		
 		// Push this user back into the map
 		committerInfo[userString] = userEntry;
 	} // end for each commit	
 
+	committerInfo[ALL_COMMITS] = globalUser;
+
 	// If we haven't processed any commits, we should stop trying to fetch data
 	// because we're not going to get anything else from this repo
 	if( Object.keys(commits).length == 0 ) {
 		isFinished = true;
-		committerInfo["all:commits"] = globalUser;
 	}
 
 	callback( committerInfo, isFinished );
