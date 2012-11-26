@@ -49,6 +49,7 @@ function getLocalCommits( repoPath, branchName, forcePull, callback ) {
 		var cachedCommitInfo = analysisCache[repoPath];
 
 		if( typeof(cachedCommitInfo) != "undefined" ) {
+			console.log( "Returning cached copy of " + repoPath + " to user" );
 			callback( cachedCommitInfo );
 			return;
 		}
@@ -94,11 +95,13 @@ function getLocalCommits( repoPath, branchName, forcePull, callback ) {
 					return;
 				}
 
-				parseCommits( commits, function( analysisData, isFinished ) {
-					if( isFinished )
+				parseCommits( commits, analysisData, function( data, isFinished ) {
+					if( isFinished ) { 
 						stopFetching = true;
+					}
 
-					analysisData = analysisData;
+					analysisData = data;
+					
 					iBatch++;
 					onError();
 				});
@@ -123,6 +126,9 @@ function getLocalCommits( repoPath, branchName, forcePull, callback ) {
 				// Delete records of us doing analysis for this repo
 				delete reposBeingAnalyzed[repoPath];
 
+				// Push this info into our cache
+				analysisCache[repoPath] = analysisData;
+
 				// Call the callback from the user who originally kicked off
 				// analysis for this repo
 				callback( analysisData );
@@ -136,9 +142,14 @@ function getLocalCommits( repoPath, branchName, forcePull, callback ) {
 
 //////////////////////////////////////////////////////////////////////////
 // Parses a set of commit infos 
-function parseCommits( commits, callback ) {
-	var committerInfo = {},
-		isFinished = false;
+function parseCommits( commits, committerInfo, callback ) {
+	// We're going to fill committerInfo with our commit data
+	// If it's undefined, just create a blank object
+	if( typeof(committerInfo) == "undefined" ) {
+		committerInfo = {};
+	}
+
+	var isFinished = false;
 
 	// Setup a user that will represent the entire repository
 	var globalUser = {
@@ -183,7 +194,6 @@ function parseCommits( commits, callback ) {
 	// If we haven't processed any commits, we should stop trying to fetch data
 	// because we're not going to get anything else from this repo
 	if( Object.keys(commits).length == 0 ) {
-		console.log( "finished" );
 		isFinished = true;
 		committerInfo["all:commits"] = globalUser;
 	}
